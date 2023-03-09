@@ -1,0 +1,10 @@
+/workspaces/quick-poll/quick-poll/src/main/java/com/apress/quickpoll/repository/OptionRepository.java
+/workspaces/quick-poll/quick-poll/src/main/java/com/apress/quickpoll/domain/Vote.java
+/workspaces/quick-poll/quick-poll/src/main/java/com/apress/quickpoll/repository/VoteRepository.java
+/workspaces/quick-poll/quick-poll/src/main/java/com/apress/quickpoll/Controller/HelloController.java
+/workspaces/quick-poll/quick-poll/src/main/java/com/apress/quickpoll/domain/Option.java
+/workspaces/quick-poll/quick-poll/src/main/java/com/apress/quickpoll/domain/Poll.java
+/workspaces/quick-poll/quick-poll/src/main/java/com/apress/quickpoll/repository/PollRepository.java
+/workspaces/quick-poll/quick-poll/src/main/java/com/apress/quickpoll/Controller/Inject.java
+/workspaces/quick-poll/quick-poll/src/main/java/com/apress/quickpoll/QuickPollApplication.java
+/workspaces/quick-poll/quick-poll/src/main/java/com/apress/quickpoll/Controller/PollController.java
