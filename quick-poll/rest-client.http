@@ -1,0 +1,19 @@
+# GET http://localhost:8080/polls
+# Content-Type: application/json
+
+# upload poll
+# POST http://localhost:8080/polls
+# Content-Type: application/json
+
+# {
+#     "question": "Who will win SuperBowl this year?",
+#     "options": [
+#         {"value": "New England Patriots"},
+#         {"value": "Seattle SeaHawks"},
+#         {"value": "Green Bay Packers"},
+#         {"value": "Denver Broncos"}        
+#     ]
+# }
+
+# get poll
+GET http://localhost:8080/polls/1
