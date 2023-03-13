@@ -1,7 +1,6 @@
 # GET http://localhost:8080/polls
-# Content-Type: application/json
+# Connection: keep-alive
 
-# upload poll
 # POST http://localhost:8080/polls
 # Content-Type: application/json
 
@@ -15,5 +14,29 @@
 #     ]
 # }
 
-# get poll
-GET http://localhost:8080/polls/1
+# GET http://localhost:8080/polls/1
+
+# DELETE http://localhost:8080/polls/2
+
+# update poll
+# PUT http://localhost:8080/polls/1
+# Content-Type: application/json
+
+# {
+#     "question": "Who will win BasketBall this year?",
+#     "options": [
+#         {"value": "New England Patriots"},
+#         {"value": "Seattle SeaHawks"},
+#         {"value": "Green Bay Packers"},
+#         {"value": "Denver Broncos"}        
+#     ]
+# }
+
+# POST http://localhost:8080/polls/1/votes
+# Content-Type: application/json
+
+# {
+#     "option": { "id": 8, "value": "Seattle SeaHawks" }
+# }
+
+#  GET http://localhost:8080/polls/1/votes
