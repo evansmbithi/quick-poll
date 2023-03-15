@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.apress.quickpoll.domain.Poll;
+import com.apress.quickpoll.exception.ResourceNotFoundException;
 import com.apress.quickpoll.repository.PollRepository;
 
 @RestController
@@ -55,28 +56,45 @@ public class PollController {
         return new ResponseEntity<>(null, responseHeaders, HttpStatus.CREATED);
     }
 
-    // individual poll
-    @GetMapping("/polls/{pollId}")
-    public ResponseEntity <?> getPoll(@PathVariable Long pollId) throws Exception{
+    protected Poll verifyPoll(Long pollId) throws ResourceNotFoundException {
         Optional<Poll> poll = pollRepository.findById(pollId);
         if(!poll.isPresent()){
-            throw new Exception("Poll not found");
+            /* 
+             * poll ID validation
+             * Instead of throw new Exception("Poll not found"); 
+             * when validating pollId for nonexistant polls
+             * Throw a custom exception ResourceNotFoundException
+             */
+            throw new ResourceNotFoundException("Poll with id " + pollId + " not found");
         }
-        return new ResponseEntity<>(poll.get(), HttpStatus.OK);                
+        return poll.get();
+    }
+
+    // individual poll
+    @GetMapping("/polls/{pollId}")
+    public ResponseEntity <?> getPoll(@PathVariable Long pollId) {
+        // poll ID validation
+        return new ResponseEntity<>(verifyPoll(pollId), HttpStatus.OK);                
     }
 
     @PutMapping("/polls/{pollId}")
     public ResponseEntity<?> updatePoll(@RequestBody Poll poll, @PathVariable Long pollId){
+        /*
         // set id
         poll.setId(pollId);
         // save the entity
         Poll newPoll = pollRepository.save(poll);
         return new ResponseEntity<>(newPoll,HttpStatus.OK);
+        */
+        verifyPoll(pollId);
+        pollRepository.save(poll);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/polls/{pollId}")
     public ResponseEntity<?> deletePoll(@PathVariable Long pollId) {
         pollRepository.deleteById(pollId);
+        // pollRepository.delete(pollId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

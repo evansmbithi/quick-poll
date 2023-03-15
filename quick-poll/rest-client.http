@@ -14,7 +14,7 @@
 #     ]
 # }
 
-# GET http://localhost:8080/polls/1
+GET http://localhost:8080/polls/1
 
 # DELETE http://localhost:8080/polls/2
 
@@ -32,11 +32,18 @@
 #     ]
 # }
 
+# VOTE
 # POST http://localhost:8080/polls/1/votes
 # Content-Type: application/json
 
 # {
-#     "option": { "id": 8, "value": "Seattle SeaHawks" }
+#     "option": {
+#         "id": 1,
+#         "value": "New England Patriots"
+#       }
 # }
 
 #  GET http://localhost:8080/polls/1/votes
+
+# Compute results
+# GET http://localhost:8080/computeresult?pollId=1
