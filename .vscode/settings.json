@@ -2,5 +2,5 @@
     "java.configuration.runtimes": [
         
     ],
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

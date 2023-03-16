@@ -14,7 +14,7 @@
 #     ]
 # }
 
-GET http://localhost:8080/polls/1
+# GET http://localhost:8080/polls/1
 
 # DELETE http://localhost:8080/polls/2
 

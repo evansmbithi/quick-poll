@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.apress.quickpoll.customException.ResourceNotFoundException;
 import com.apress.quickpoll.domain.Poll;
-import com.apress.quickpoll.exception.ResourceNotFoundException;
 import com.apress.quickpoll.repository.PollRepository;
 
 @RestController
@@ -40,9 +41,12 @@ public class PollController {
      *  The @RequestBody annotation tells Spring 
      * that the entire request body needs to be converted
      * to an instance of Poll.
+     * The @Valid annotation instructs Spring to perform data validation 
+     * after binding the user-submitted data. Spring delegates the actual
+     * validation to a registered Validator
      */
     @PostMapping("/polls")
-    public ResponseEntity<?> createPoll (@RequestBody Poll poll){
+    public ResponseEntity<?> createPoll (@Valid @RequestBody Poll poll){
         poll = pollRepository.save(poll);
 
         HttpHeaders responseHeaders = new HttpHeaders();
@@ -80,11 +84,11 @@ public class PollController {
     @PutMapping("/polls/{pollId}")
     public ResponseEntity<?> updatePoll(@RequestBody Poll poll, @PathVariable Long pollId){
         /*
-        // set id
-        poll.setId(pollId);
-        // save the entity
-        Poll newPoll = pollRepository.save(poll);
-        return new ResponseEntity<>(newPoll,HttpStatus.OK);
+            // set id
+            poll.setId(pollId);
+            // save the entity
+            Poll newPoll = pollRepository.save(poll);
+            return new ResponseEntity<>(newPoll,HttpStatus.OK);
         */
         verifyPoll(pollId);
         pollRepository.save(poll);

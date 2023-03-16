@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 @Entity
 public class Poll {
@@ -20,11 +22,13 @@ public class Poll {
     private Long id;
 
     @Column(name="QUESTION")
+    @NotEmpty
     private String question;
 
     @OneToMany(cascade=CascadeType.ALL)
     @JoinColumn(name="POLL_ID")
     @OrderBy
+    @Size(min=2, max=6) //restrict each poll to contain no fewer than two and no more than six options.
     private Set<Option> options;
 
     public Long getId() {
