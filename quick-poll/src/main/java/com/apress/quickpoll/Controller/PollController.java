@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,7 +38,7 @@ public class PollController {
     }
 
     /*
-     *  The @RequestBody annotation tells Spring 
+     * The @RequestBody annotation tells Spring 
      * that the entire request body needs to be converted
      * to an instance of Poll.
      * The @Valid annotation instructs Spring to perform data validation 

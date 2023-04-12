@@ -1,13 +1,32 @@
 package com.apress.quickpoll.dto.error;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class ErrorDetail {
     
     private String title;
     private int status;
     private String detail;
     private Long timestamp;
+    private String path;
     private String developerMessage;
+
+    private Map<String, List<ValidationError>> errors = new HashMap<String, List<ValidationError>>();
     
+    public String getPath() {
+        return path;
+    }
+    public void setPath(String path) {
+        this.path = path;
+    }
+    public Map<String, List<ValidationError>> getErrors() {
+        return errors;
+    }
+    public void setErrors(Map<String, List<ValidationError>> errors) {
+        this.errors = errors;
+    }
     public String getTitle() {
         return title;
     }

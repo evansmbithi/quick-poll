@@ -1,14 +1,28 @@
 package com.apress.quickpoll.handler;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+// import javax.inject.Inject;
+
+// import org.springframework.context.MessageSource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+// import org.springframework.web.bind.annotation.ExceptionHandler;
+// import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.apress.quickpoll.customException.ResourceNotFoundException;
 import com.apress.quickpoll.dto.error.ErrorDetail;
+import com.apress.quickpoll.dto.error.ValidationError;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -17,26 +31,137 @@ import jakarta.servlet.http.HttpServletRequest;
  * in the same way and writes the associated details to the response body. 
  * Classes annotated with @ControllerAdvice can be used to implement such 
  * crosscutting concerns
+ * 
+ * Thanks to the @ExceptionHandler annotation, any time a 
+ * ResourceNotFoundException is thrown by a controller, 
+ * Spring MVC would invoke the RestExceptionHandler’s 
+ * handleResourceNotFoundException method. Inside this 
+ * method, we create an instance of ErrorDetail and populate 
+ * it with error information.
+ * 
+ * read the properties from quick-poll/src/main/resources/messages.properties 
+ * and use them during the ValidationError instance creation
+ * 
+ * The property file approach not only simplifies Java code but also makes it 
+ * easy to swap the messages without making code changes. 
+ * 
+ * Spring’s MessageSource provides an abstraction to easily resolve messages
+ * We are using MessageResource's getMessage method to retrieve messages
  */
+
+ /*
 @ControllerAdvice
 public class RestExceptionHandler {
-    /*
-     * Thanks to the @ExceptionHandler annotation, any time a 
-     * ResourceNotFoundException is thrown by a controller, 
-     * Spring MVC would invoke the RestExceptionHandler’s 
-     * handleResourceNotFoundException method. Inside this 
-     * method, we create an instance of ErrorDetail and populate 
-     * it with error information.
-     */
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException rnfe, HttpServletRequest request) {
-        ErrorDetail errorDetail = new ErrorDetail();
-        errorDetail.setTimestamp(new Date().getTime()); // set time in milliseconds
-        errorDetail.setStatus(HttpStatus.NOT_FOUND.value());
-        errorDetail.setTitle("Resource Not Found");
-        errorDetail.setDetail(rnfe.getMessage());
-        errorDetail.setDeveloperMessage(rnfe.getClass().getName());
 
-        return new ResponseEntity<>(errorDetail, null, HttpStatus.NOT_FOUND);
-    }    
+    @Inject
+    private MessageSource messageSource;
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public @ResponseBody ErrorDetail handleValidationError(MethodArgumentNotValidException manve, HttpServletRequest request) {
+        ErrorDetail errorDetail = new ErrorDetail();
+        errorDetail.setTimestamp(new Date().getTime());
+        errorDetail.setStatus(HttpStatus.BAD_REQUEST.value());
+        String requestPath = (String) request.getAttribute("javax.servlet.error.request_uri");
+
+        if(requestPath == null) {
+            requestPath = request.getRequestURI();
+        }
+        errorDetail.setTitle("Validation Failed");
+        errorDetail.setDetail("Input validation failed");
+        errorDetail.setDeveloperMessage(manve.getClass().getName());
+
+        // Create Validation Error instances
+        List<FieldError> FieldErrors = manve.getBindingResult().getFieldErrors();
+        for(FieldError fe : FieldErrors) {
+            List<ValidationError> validationErrorList = errorDetail.getErrors().get(fe.getField());
+            if(validationErrorList == null){
+                validationErrorList = new ArrayList<ValidationError>();
+                errorDetail.getErrors().put(fe.getField(), validationErrorList);
+            }
+            ValidationError validationError = new ValidationError();
+            validationError.setCode(fe.getCode());
+            // validationError.setMessage(fe.getDefaultMessage());
+            validationError.setMessage(messageSource.getMessage(fe,null)); 
+            validationErrorList.add(validationError);
+        }
+
+        return errorDetail;
+    }
+
+}
+
+       /*
+        * replaced the handleResourceNotFoundException with handleValidationError
+            
+          @ExceptionHandler(ResourceNotFoundException.class)
+          public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException rnfe, HttpServletRequest request) {
+            ErrorDetail errorDetail = new ErrorDetail();
+            errorDetail.setTimestamp(new Date().getTime()); // set time in milliseconds
+            errorDetail.setStatus(HttpStatus.NOT_FOUND.value());
+            errorDetail.setTitle("Resource Not Found");
+            errorDetail.setDetail(rnfe.getMessage());
+            errorDetail.setDeveloperMessage(rnfe.getClass().getName());
+
+            return new ResponseEntity<>(errorDetail, null, HttpStatus.NOT_FOUND);
+          }
+        */
+
+@ControllerAdvice
+public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @Override
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+        HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+            ErrorDetail errorDetail = new ErrorDetail();
+            errorDetail.setTimestamp(new Date().getTime()); // set time in milliseconds
+            errorDetail.setStatus(status.value());
+            errorDetail.setTitle("Message Not Readable");
+            errorDetail.setDetail(ex.getMessage());
+            errorDetail.setDeveloperMessage(ex.getClass().getName());
+
+            return handleExceptionInternal(ex, errorDetail, headers, status, request);
+        }
+
+        /**
+         * @param manve MethodArgumentNotValidException
+         * @param headers HttpHeaders
+         * @param status HttpStatus
+         * @param request WebRequest
+         * @return
+         */
+        @Override
+        public ResponseEntity<Object> handleMethodArgumentNotValid(
+			MethodArgumentNotValidException manve, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+            ErrorDetail errorDetail = new ErrorDetail();
+            errorDetail.setTimestamp(new Date().getTime());
+            errorDetail.setStatus(HttpStatus.BAD_REQUEST.value());
+            String requestPath = (String) request.getAttribute("javax.servlet.error.request_uri", 0);
+
+            if(requestPath == null) {
+                requestPath = ((HttpServletRequest) request).getRequestURI();
+            }
+            errorDetail.setTitle("Validation Failed");
+            errorDetail.setDetail("Input validation failed");
+            errorDetail.setDeveloperMessage(manve.getClass().getName());
+
+            // Create Validation Error instances
+            List<FieldError> FieldErrors = manve.getBindingResult().getFieldErrors();
+            for(FieldError fe : FieldErrors) {
+                List<ValidationError> validationErrorList = errorDetail.getErrors().get(fe.getField());
+                if(validationErrorList == null){
+                    validationErrorList = new ArrayList<ValidationError>();
+                    errorDetail.getErrors().put(fe.getField(), validationErrorList);
+                }
+                ValidationError validationError = new ValidationError();
+                validationError.setCode(fe.getCode());
+                // validationError.setMessage(fe.getDefaultMessage());
+                validationError.setMessage(getMessageSource().getMessage(fe,null)); 
+                validationErrorList.add(validationError);
+            }
+            
+            return handleExceptionInternal(manve, errorDetail, headers, status, request);
+        }
+
 }

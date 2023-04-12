@@ -16,6 +16,11 @@
 
 # GET http://localhost:8080/polls/1
 
+# API Documentation
+# GET http://localhost:8080/v3/api-docs
+
+# GET http://localhost:8080/swagger-ui.html
+
 # DELETE http://localhost:8080/polls/2
 
 # update poll
