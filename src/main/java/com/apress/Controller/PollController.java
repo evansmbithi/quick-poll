@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

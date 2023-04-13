@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-// import javax.inject.Inject;
+import javax.inject.Inject;
+// import javax.servlet.http.HttpServletRequest;
 
-// import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -20,11 +20,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.apress.dto.error.ErrorDetail;
 import com.apress.dto.error.ValidationError;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 /*
  * We need an application-wide strategy that handles all of the errors 
@@ -110,10 +109,13 @@ public class RestExceptionHandler {
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
+    @Inject
+    private MessageSource messageSource;
+
     @Override
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
-        HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
             ErrorDetail errorDetail = new ErrorDetail();
             errorDetail.setTimestamp(new Date().getTime()); // set time in milliseconds
             errorDetail.setStatus(status.value());
@@ -133,14 +135,24 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
          */
         @Override
         public ResponseEntity<Object> handleMethodArgumentNotValid(
-			MethodArgumentNotValidException manve, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+			MethodArgumentNotValidException manve, HttpHeaders headers, HttpStatus status, WebRequest request) {
             ErrorDetail errorDetail = new ErrorDetail();
             errorDetail.setTimestamp(new Date().getTime());
             errorDetail.setStatus(HttpStatus.BAD_REQUEST.value());
             String requestPath = (String) request.getAttribute("javax.servlet.error.request_uri", 0);
 
             if(requestPath == null) {
-                requestPath = ((HttpServletRequest) request).getRequestURI();
+                // requestPath =  request.getRequestURI();
+                /*
+                 * Use the ServletUriComponentsBuilder: This is a utility class provided by Spring 
+                 * that can be used to build URIs based on the current request. You can use the 
+                 * fromCurrentRequest() method of the ServletUriComponentsBuilder class to get a 
+                 * builder initialized with the current request information, and then use the 
+                 * build().toUriString() method to get the request URI as a string.
+                 */
+                requestPath = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
+
+
             }
             errorDetail.setTitle("Validation Failed");
             errorDetail.setDetail("Input validation failed");
@@ -157,7 +169,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                 ValidationError validationError = new ValidationError();
                 validationError.setCode(fe.getCode());
                 // validationError.setMessage(fe.getDefaultMessage());
-                validationError.setMessage(getMessageSource().getMessage(fe,null)); 
+                validationError.setMessage(messageSource.getMessage(fe,null)); 
                 validationErrorList.add(validationError);
             }
             
