@@ -19,7 +19,7 @@
 # API Documentation
 # GET http://localhost:8080/v3/api-docs
 
-# GET http://localhost:8080/swagger-ui.html
+# GET http://localhost:8080/swagger-ui/index.html
 
 # DELETE http://localhost:8080/polls/2
 
